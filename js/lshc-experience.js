@@ -72,6 +72,10 @@
   function eBack(x) { var c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); }
   var C_AQUA = 0x3fc3ec, C_LIME = 0x86eb22, C_GREEN = 0x86bc25, C_ORANGE = 0xed8b00, C_TEAL = 0x005587, C_PAPER = 0xffffff;
 
+  var LT = false, themeSeen = false, floorShadow = null, bgPlane = null;
+  function setTheme(on) {
+    LT = on; ProtoTheme.apply(scene, on); renderer.setClearColor(on ? ProtoTheme.BG_HEX : 0x080b09, 1); if (bloom) bloom.enabled = !on; if (floorShadow) floorShadow.visible = on; if (bgPlane) bgPlane.visible = !on;
+  }
   var ICONS3 = {
     body: '<svg viewBox="0 0 48 48"><circle cx="24" cy="8" r="5"/><path d="M14 18h20M24 15v16M24 31l-8 14M24 31l8 14M14 18l-6 12M34 18l6 12"/></svg>',
     molecule: '<svg viewBox="0 0 48 48"><circle cx="14" cy="14" r="6"/><circle cx="36" cy="18" r="5"/><circle cx="24" cy="36" r="6"/><path d="M19 17l12 1M17 19l5 12M33 22l-6 10"/></svg>',
@@ -116,9 +120,9 @@
   function pointsMat(size, color, op, vc) { return new THREE.PointsMaterial({ size: size, map: dotTex(), color: color, transparent: true, opacity: op === undefined ? 1 : op, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true, vertexColors: !!vc }); }
   function holoMat(color, op, power, scanBand) {
     return new THREE.ShaderMaterial({
-      uniforms: { uCol: { value: new THREE.Color(color) }, uOp: { value: op }, uTime: { value: 0 }, uScan: { value: -99 }, uPow: { value: power || 2.2 }, uBand: { value: scanBand === undefined ? 1 : scanBand } },
+      uniforms: { uCol: { value: new THREE.Color(color) }, uOp: { value: op }, uTime: { value: 0 }, uScan: { value: -99 }, uPow: { value: power || 2.2 }, uLight: { value: 0 }, uBand: { value: scanBand === undefined ? 1 : scanBand } },
       vertexShader: 'varying vec3 vN; varying vec3 vV; varying vec3 vW; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); vW = (modelMatrix*vec4(position,1.0)).xyz; gl_Position = projectionMatrix*mv; }',
-      fragmentShader: 'uniform vec3 uCol; uniform float uOp; uniform float uTime; uniform float uScan; uniform float uPow; uniform float uBand; varying vec3 vN; varying vec3 vV; varying vec3 vW; void main(){ float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), uPow); float band = 0.5 + 0.5*sin(vW.y*34.0 - uTime*1.7); float sc = smoothstep(0.32, 0.0, abs(vW.y - uScan)); float a = uOp*(0.05 + 0.7*f)*(1.0 - uBand*0.3 + uBand*0.3*band) + sc*0.55*uOp; vec3 c = mix(uCol, vec3(0.53,0.92,0.13), sc); gl_FragColor = vec4(c*(0.75 + 0.7*f), a); }',
+      fragmentShader: 'uniform vec3 uCol; uniform float uOp; uniform float uTime; uniform float uScan; uniform float uPow; uniform float uBand; uniform float uLight; varying vec3 vN; varying vec3 vV; varying vec3 vW; void main(){ float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), uPow); float band = 0.5 + 0.5*sin(vW.y*34.0 - uTime*1.7); float sc = smoothstep(0.32, 0.0, abs(vW.y - uScan)); float a = uOp*(0.05 + 0.7*f)*(1.0 - uBand*0.3 + uBand*0.3*band) + sc*0.55*uOp; vec3 c = mix(uCol, vec3(0.53,0.92,0.13), sc); vec4 o = vec4(c*(0.75 + 0.7*f), a); if (uLight > 0.5) { o = vec4(c*0.6, min(1.0, a*1.35)); } gl_FragColor = o; }',
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.FrontSide
     });
   }
@@ -167,12 +171,12 @@
   }
   function ringAt(x, y, z, color, size) {
     var r = null; for (var i = 0; i < rings.length; i++) if (!rings[i].on) { r = rings[i]; break; } if (!r) return;
-    r.on = true; r.t = 0; r.size = size || 1.6; r.mesh.position.set(x, y, z); r.mesh.material.color.setHex(color); r.mesh.visible = true;
+    r.on = true; r.t = 0; r.size = size || 1.6; r.mesh.position.set(x, y, z); r.mesh.material.color.setHex(color); if (LT) r.mesh.material.color.multiplyScalar(0.55); r.mesh.visible = true;
   }
   function fxStep(dt) {
     for (var i = 0; i < PN; i++) {
-      if (pLife[i] > 0) { pLife[i] -= dt; var f = Math.max(0, pLife[i] / pMax[i]); pPos[i * 3] += pVel[i * 3] * dt; pPos[i * 3 + 1] += pVel[i * 3 + 1] * dt; pPos[i * 3 + 2] += pVel[i * 3 + 2] * dt; pVel[i * 3] *= 0.97; pVel[i * 3 + 1] *= 0.97; pVel[i * 3 + 2] *= 0.97; pCol[i * 3] = pBase[i * 3] * f; pCol[i * 3 + 1] = pBase[i * 3 + 1] * f; pCol[i * 3 + 2] = pBase[i * 3 + 2] * f; }
-      else { pCol[i * 3] = pCol[i * 3 + 1] = pCol[i * 3 + 2] = 0; }
+      if (pLife[i] > 0) { pLife[i] -= dt; var f = Math.max(0, pLife[i] / pMax[i]); pPos[i * 3] += pVel[i * 3] * dt; pPos[i * 3 + 1] += pVel[i * 3 + 1] * dt; pPos[i * 3 + 2] += pVel[i * 3 + 2] * dt; pVel[i * 3] *= 0.97; pVel[i * 3 + 1] *= 0.97; pVel[i * 3 + 2] *= 0.97; if (LT) { for (var q = 0; q < 3; q++) pCol[i * 3 + q] = ProtoTheme.BG[q] + (pBase[i * 3 + q] * 0.55 - ProtoTheme.BG[q]) * f; } else { pCol[i * 3] = pBase[i * 3] * f; pCol[i * 3 + 1] = pBase[i * 3 + 1] * f; pCol[i * 3 + 2] = pBase[i * 3 + 2] * f; } }
+      else { if (LT) { pCol[i * 3] = ProtoTheme.BG[0]; pCol[i * 3 + 1] = ProtoTheme.BG[1]; pCol[i * 3 + 2] = ProtoTheme.BG[2]; } else pCol[i * 3] = pCol[i * 3 + 1] = pCol[i * 3 + 2] = 0; }
     }
     pGeo.attributes.position.needsUpdate = true; pGeo.attributes.color.needsUpdate = true;
     rings.forEach(function (r) { if (!r.on) return; r.t += dt / 1.2; if (r.t >= 1) { r.on = false; r.mesh.visible = false; return; } r.mesh.scale.setScalar(0.1 + r.size * eO(r.t)); r.mesh.material.opacity = 0.55 * (1 - r.t); r.mesh.quaternion.copy(camera.quaternion); });
@@ -440,7 +444,7 @@
   function buildGlobe() {
     var g = new THREE.Group(), RAD = 1.48, M = { key: 'globe', group: g, focus: [9.2, 9.0, 9.0, 9.2, 9.0], tilt: true, act: 'Ship a dose', dist: 10.4 };
     var earth = new THREE.Group(); g.add(earth);
-    earth.add(new THREE.Mesh(new THREE.SphereGeometry(RAD * 0.994, 64, 48), new THREE.MeshBasicMaterial({ color: 0x06202a })));
+    var ecore = new THREE.Mesh(new THREE.SphereGeometry(RAD * 0.994, 64, 48), new THREE.MeshBasicMaterial({ color: 0x06202a })); ecore.userData.ptCol = 0xdbe6ef; earth.add(ecore);
     var eshell = new THREE.Mesh(new THREE.SphereGeometry(RAD * 0.998, 64, 48), holoMat(C_AQUA, 0.5, 2.4, 1)); earth.add(eshell);
     var atm = new THREE.Mesh(new THREE.SphereGeometry(RAD * 1.16, 64, 48), new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.BackSide, vertexShader: 'varying vec3 vN; void main(){ vN = normalize(normalMatrix*normal); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }', fragmentShader: 'varying vec3 vN; void main(){ float i = pow(0.62 - dot(vN, vec3(0.0,0.0,1.0)), 3.0); gl_FragColor = vec4(0.25,0.76,0.93,1.0)*clamp(i,0.0,1.0)*0.65; }' })); g.add(atm);
     var atm2 = new THREE.Mesh(new THREE.SphereGeometry(RAD * 1.38, 64, 48), new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.BackSide, vertexShader: 'varying vec3 vN; void main(){ vN = normalize(normalMatrix*normal); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }', fragmentShader: 'varying vec3 vN; void main(){ float i = pow(0.55 - dot(vN, vec3(0.0,0.0,1.0)), 4.0); gl_FragColor = vec4(0.53,0.92,0.13,1.0)*clamp(i,0.0,1.0)*0.4; }' })); g.add(atm2);
@@ -449,10 +453,10 @@
     var lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(lp, 3)); earth.add(new THREE.Points(lg, pointsMat(0.05, C_AQUA, 0.95)));
     var grat = []; for (var la = -60; la <= 60; la += 30) for (var lo = 0; lo < 360; lo += 6) { var a = ll2v(la, lo, RAD * 1.001), b = ll2v(la, lo + 6, RAD * 1.001); grat.push(a.x, a.y, a.z, b.x, b.y, b.z); } for (var lo2 = 0; lo2 < 360; lo2 += 30) for (var la2 = -84; la2 < 84; la2 += 6) { var c = ll2v(la2, lo2, RAD * 1.001), d = ll2v(la2 + 6, lo2, RAD * 1.001); grat.push(c.x, c.y, c.z, d.x, d.y, d.z); }
     var gg = new THREE.BufferGeometry(); gg.setAttribute('position', new THREE.Float32BufferAttribute(grat, 3)); earth.add(new THREE.LineSegments(gg, new THREE.LineBasicMaterial({ color: C_AQUA, transparent: true, opacity: 0.1 })));
-    var CITY = { blr: [12.97, 77.59], bos: [42.36, -71.06], nbo: [-1.29, 36.82], fra: [50.11, 8.68], syd: [-33.87, 151.21], sao: [-23.55, -46.63], sin: [1.35, 103.82], nyc: [40.71, -74.0], lon: [51.5, -0.12], tok: [35.68, 139.69], dxb: [25.2, 55.27] };
-    var marks = []; Object.keys(CITY).forEach(function (k) { var p = ll2v(CITY[k][0], CITY[k][1], RAD * 1.01), hot = ['blr', 'bos', 'nbo', 'syd', 'fra'].indexOf(k) >= 0, m = new THREE.Mesh(new THREE.SphereGeometry(hot ? 0.035 : 0.022, 12, 10), new THREE.MeshBasicMaterial({ color: hot ? C_LIME : C_AQUA })); m.position.copy(p); earth.add(m); var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex(), color: hot ? C_LIME : C_AQUA, transparent: true, opacity: hot ? 0.9 : 0.5, blending: THREE.AdditiveBlending, depthWrite: false })); sp.scale.setScalar(hot ? 0.28 : 0.16); sp.position.copy(p); earth.add(sp); marks.push({ k: k, sp: sp, hot: hot, p: p }); });
+    var CITY = { hyd: [17.39, 78.49], bos: [42.36, -71.06], nbo: [-1.29, 36.82], fra: [50.11, 8.68], syd: [-33.87, 151.21], sao: [-23.55, -46.63], sin: [1.35, 103.82], nyc: [40.71, -74.0], lon: [51.5, -0.12], tok: [35.68, 139.69], dxb: [25.2, 55.27] };
+    var marks = []; Object.keys(CITY).forEach(function (k) { var p = ll2v(CITY[k][0], CITY[k][1], RAD * 1.01), hot = ['hyd', 'bos', 'nbo', 'syd', 'fra'].indexOf(k) >= 0, m = new THREE.Mesh(new THREE.SphereGeometry(hot ? 0.035 : 0.022, 12, 10), new THREE.MeshBasicMaterial({ color: hot ? C_LIME : C_AQUA })); m.position.copy(p); earth.add(m); var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex(), color: hot ? C_LIME : C_AQUA, transparent: true, opacity: hot ? 0.9 : 0.5, blending: THREE.AdditiveBlending, depthWrite: false })); sp.scale.setScalar(hot ? 0.28 : 0.16); sp.position.copy(p); earth.add(sp); marks.push({ k: k, sp: sp, hot: hot, p: p }); });
     function arc(a, b, h) { var A = ll2v(CITY[a][0], CITY[a][1], RAD * 1.01), B = ll2v(CITY[b][0], CITY[b][1], RAD * 1.01), mid = A.clone().add(B).multiplyScalar(0.5).normalize().multiplyScalar(RAD * (1.01 + h)); return new THREE.QuadraticBezierCurve3(A, mid, B); }
-    var ARCS = [['fra', 'blr', 0.38], ['bos', 'fra', 0.3], ['blr', 'syd', 0.34], ['blr', 'nbo', 0.26], ['bos', 'sao', 0.28], ['blr', 'sin', 0.18], ['nyc', 'lon', 0.2], ['blr', 'tok', 0.3], ['dxb', 'blr', 0.16]].map(function (d) { var cv2 = arc(d[0], d[1], d[2]); var ln = new THREE.Line(new THREE.BufferGeometry().setFromPoints(cv2.getPoints(60)), new THREE.LineBasicMaterial({ color: C_AQUA, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false })); earth.add(ln); return { curve: cv2, ph: R() }; });
+    var ARCS = [['fra', 'hyd', 0.38], ['bos', 'fra', 0.3], ['hyd', 'syd', 0.34], ['hyd', 'nbo', 0.26], ['bos', 'sao', 0.28], ['hyd', 'sin', 0.18], ['nyc', 'lon', 0.2], ['hyd', 'tok', 0.3], ['dxb', 'hyd', 0.16]].map(function (d) { var cv2 = arc(d[0], d[1], d[2]); var ln = new THREE.Line(new THREE.BufferGeometry().setFromPoints(cv2.getPoints(60)), new THREE.LineBasicMaterial({ color: C_AQUA, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false })); earth.add(ln); return { curve: cv2, ph: R() }; });
     var PK = ARCS.length * 3, pkPos = new Float32Array(PK * 3), pkG = new THREE.BufferGeometry(); pkG.setAttribute('position', new THREE.BufferAttribute(pkPos, 3)); earth.add(new THREE.Points(pkG, pointsMat(0.09, C_LIME, 1)));
     var TL = 6, trPk = new Float32Array(PK * TL * 3), trCl = new Float32Array(PK * TL * 3), trPG = new THREE.BufferGeometry(), lc0 = new THREE.Color(C_LIME);
     for (var pi = 0; pi < PK; pi++) for (var tj = 0; tj < TL; tj++) { var fc = Math.pow(1 - tj / TL, 1.8) * 0.8, ii = (pi * TL + tj) * 3; trCl[ii] = lc0.r * fc; trCl[ii + 1] = lc0.g * fc; trCl[ii + 2] = lc0.b * fc; }
@@ -463,16 +467,16 @@
     var beamG = new THREE.BufferGeometry(); beamG.setAttribute('position', new THREE.BufferAttribute(new Float32Array(2 * 2 * 3), 3)); var beams = new THREE.LineSegments(beamG, new THREE.LineBasicMaterial({ color: C_LIME, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })); g.add(beams);
     var ship = new THREE.Group(), cap = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.09, 12), new THREE.MeshBasicMaterial({ color: C_LIME })); cap.rotation.x = Math.PI / 2; ship.add(cap); var shg = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex(), color: C_LIME, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); shg.scale.setScalar(0.34); ship.add(shg); ship.visible = false; earth.add(ship);
     var trailN = 40, trPos = new Float32Array(trailN * 3), trG = new THREE.BufferGeometry(); trG.setAttribute('position', new THREE.BufferAttribute(trPos, 3)); var trail = new THREE.Points(trG, pointsMat(0.07, C_LIME, 0.9)); trail.visible = false; earth.add(trail);
-    var shipState = { on: false, t: 0 }, mid = ARCS[0].curve.getPoint(0.5), ringT = 0, ringI = 0, blrP = ll2v(CITY.blr[0], CITY.blr[1], RAD * 1.01), sv = new THREE.Vector3();
+    var shipState = { on: false, t: 0 }, mid = ARCS[0].curve.getPoint(0.5), ringT = 0, ringI = 0, hydP = ll2v(CITY.hyd[0], CITY.hyd[1], RAD * 1.01), sv = new THREE.Vector3();
     M.anchors = [
-      { get: function (o) { return o.copy(ll2v(CITY.blr[0], CITY.blr[1], RAD * 1.03)); } }, { get: function (o) { return o.copy(ll2v(CITY.bos[0], CITY.bos[1], RAD * 1.03)); } },
+      { get: function (o) { return o.copy(ll2v(CITY.hyd[0], CITY.hyd[1], RAD * 1.03)); } }, { get: function (o) { return o.copy(ll2v(CITY.bos[0], CITY.bos[1], RAD * 1.03)); } },
       { get: function (o) { return o.copy(ll2v(CITY.nbo[0], CITY.nbo[1], RAD * 1.03)); } }, { get: function (o) { return o.copy(mid).multiplyScalar(1.02); } }, { get: function (o) { return o.copy(ll2v(CITY.syd[0], CITY.syd[1], RAD * 1.03)); } }
     ];
     M.onEnter = function () { shipState.on = false; ship.visible = trail.visible = false; }; M.onSelect = function () {}; M.onDeselect = function () {};
     M.doAct = function () { sfx.scan(); shipState = { on: true, t: 0 }; ship.visible = trail.visible = true; };
     M.update = function (T, dt) {
       eshell.material.uniforms.uTime.value = T; clouds.rotation.y = T * 0.035; clouds.rotation.x = T * 0.01; var bp = beamG.attributes.position.array, bop = 0;
-      orbs.forEach(function (o, oi) { o.a += dt * o.sp; o.sat.position.set(Math.cos(o.a) * o.r, Math.sin(o.a) * o.r, 0); o.og.updateMatrixWorld(true); sv.copy(o.sat.position); o.og.localToWorld(sv); g.worldToLocal(sv); var vis = sv.dot(blrP) > RAD * RAD * 0.9; bp[oi * 6] = sv.x; bp[oi * 6 + 1] = sv.y; bp[oi * 6 + 2] = sv.z; bp[oi * 6 + 3] = blrP.x; bp[oi * 6 + 4] = blrP.y; bp[oi * 6 + 5] = blrP.z; if (vis) bop = 0.55; if (!vis) { bp[oi * 6 + 3] = sv.x; bp[oi * 6 + 4] = sv.y; bp[oi * 6 + 5] = sv.z; } });
+      orbs.forEach(function (o, oi) { o.a += dt * o.sp; o.sat.position.set(Math.cos(o.a) * o.r, Math.sin(o.a) * o.r, 0); o.og.updateMatrixWorld(true); sv.copy(o.sat.position); o.og.localToWorld(sv); g.worldToLocal(sv); var vis = sv.dot(hydP) > RAD * RAD * 0.9; bp[oi * 6] = sv.x; bp[oi * 6 + 1] = sv.y; bp[oi * 6 + 2] = sv.z; bp[oi * 6 + 3] = hydP.x; bp[oi * 6 + 4] = hydP.y; bp[oi * 6 + 5] = hydP.z; if (vis) bop = 0.55; if (!vis) { bp[oi * 6 + 3] = sv.x; bp[oi * 6 + 4] = sv.y; bp[oi * 6 + 5] = sv.z; } });
       beamG.attributes.position.needsUpdate = true; beams.material.opacity += (bop * (0.6 + 0.4 * Math.sin(T * 12)) - beams.material.opacity) * Math.min(1, dt * 6);
       ringT -= dt; if (ringT <= 0) { ringT = 0.8; var mk = marks[(ringI++) % marks.length]; if (mk.hot) { var wpm = earth.localToWorld(mk.p.clone()); if (wpm.z > 0.4) ringAt(wpm.x, wpm.y, wpm.z, C_LIME, 0.55); } }
       marks.forEach(function (m, i) { m.sp.material.opacity = (m.hot ? 0.7 : 0.4) + 0.3 * Math.sin(T * 2.4 + i); });
@@ -522,7 +526,7 @@
         var yy = y0 + (i + 0.5) / NB * H; if (st.mode === 'scan' && st.y >= yy) lvl[i] = 1; lvl[i] *= Math.exp(-dt * 1.3);
         var glow = 0.4 + 0.35 * (0.5 + 0.5 * Math.sin(T * 2.2 - i * 0.38)) + lvl[i] * 1.1;
         if (i === VI) { tmpC.setHex(fixed ? C_LIME : C_ORANGE); glow = fixed ? 1.3 : 0.9 + 0.5 * Math.sin(T * 6); } else tmpC.setHex(PAL[type[i]]);
-        rungs.setColorAt(i, tmpC.multiplyScalar(glow));
+        rungs.setColorAt(i, tmpC.multiplyScalar(glow * (LT ? 0.55 : 1)));
       }
       rungs.instanceColor.needsUpdate = true;
       vGlow.material.color.setHex(fixed ? C_LIME : C_ORANGE); vGlow.material.opacity = 0.45 + 0.35 * Math.sin(T * (fixed ? 2 : 6)); vGlow.scale.setScalar(fixed ? 0.42 : 0.5 + 0.12 * Math.sin(T * 6));
@@ -596,9 +600,10 @@
       scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(40, LW / LH, 0.1, 100); camera.position.set(0, 0, 9); camera.setViewOffset(LW, LH, 0, VOFF, LW, LH);
       scene.add(new THREE.AmbientLight(0xa0bbb4, 0.45)); var key = new THREE.DirectionalLight(0xffffff, 0.85); key.position.set(-2, 3, 5); scene.add(key);
       rimL = new THREE.PointLight(0x3fc3ec, 1.4, 16); rimL.position.set(3, 1.5, -3); scene.add(rimL); fillL = new THREE.PointLight(0x86bc25, 0.7, 14); fillL.position.set(-3, -2, 3); scene.add(fillL);
-      (function () { var c = document.createElement('canvas'); c.width = 216; c.height = 384; var x = c.getContext('2d'); x.fillStyle = '#080b09'; x.fillRect(0, 0, 216, 384); var r1 = x.createRadialGradient(108, 170, 0, 108, 170, 190); r1.addColorStop(0, 'rgba(0,163,224,0.06)'); r1.addColorStop(1, 'rgba(0,163,224,0)'); x.fillStyle = r1; x.fillRect(0, 0, 216, 384); var r2 = x.createRadialGradient(108, 320, 0, 108, 320, 160); r2.addColorStop(0, 'rgba(134,188,37,0.08)'); r2.addColorStop(1, 'rgba(134,188,37,0)'); x.fillStyle = r2; x.fillRect(0, 0, 216, 384); var bgm = new THREE.Mesh(new THREE.PlaneGeometry(28, 49.8), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), depthWrite: false })); bgm.position.set(0, -1.5, -14); scene.add(bgm); })();
+      (function () { var c = document.createElement('canvas'); c.width = 216; c.height = 384; var x = c.getContext('2d'); x.fillStyle = '#080b09'; x.fillRect(0, 0, 216, 384); var r1 = x.createRadialGradient(108, 170, 0, 108, 170, 190); r1.addColorStop(0, 'rgba(0,163,224,0.06)'); r1.addColorStop(1, 'rgba(0,163,224,0)'); x.fillStyle = r1; x.fillRect(0, 0, 216, 384); var r2 = x.createRadialGradient(108, 320, 0, 108, 320, 160); r2.addColorStop(0, 'rgba(134,188,37,0.08)'); r2.addColorStop(1, 'rgba(134,188,37,0)'); x.fillStyle = r2; x.fillRect(0, 0, 216, 384); var bgm = new THREE.Mesh(new THREE.PlaneGeometry(28, 49.8), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), depthWrite: false })); bgm.position.set(0, -1.5, -14); scene.add(bgm); bgPlane = bgm; })();
       var sp = new Float32Array(300 * 3), R = rng3(77); for (var i = 0; i < 300; i++) { sp[i * 3] = (R() - 0.5) * 16; sp[i * 3 + 1] = (R() - 0.5) * 24; sp[i * 3 + 2] = -3 - R() * 8; } var sgm = new THREE.BufferGeometry(); sgm.setAttribute('position', new THREE.BufferAttribute(sp, 3)); ambStars = new THREE.Points(sgm, pointsMat(0.05, C_AQUA, 0.55)); scene.add(ambStars);
       pedestal = new THREE.Group(); pedestal.position.y = -2.2; scene.add(pedestal); pedestal.visible = false;
+      floorShadow = ProtoTheme.shadow(5.2, 2.6); floorShadow.position.y = -2.19; scene.add(floorShadow);
       [0.95, 1.3, 1.65].forEach(function (r) { var pr = new THREE.Mesh(new THREE.RingGeometry(r - 0.012, r, 128), addMat(C_AQUA, 0.4)); pr.rotation.x = -Math.PI / 2; pedestal.add(pr); pedRings.push(pr); });
       var tk = []; for (var ti = 0; ti < 72; ti++) { var ta = ti / 72 * PI2, r0 = ti % 6 === 0 ? 1.78 : 1.82; tk.push(Math.cos(ta) * r0, 0, Math.sin(ta) * r0, Math.cos(ta) * 1.9, 0, Math.sin(ta) * 1.9); }
       var tkg = new THREE.BufferGeometry(); tkg.setAttribute('position', new THREE.Float32BufferAttribute(tk, 3)); pedTicks = new THREE.LineSegments(tkg, new THREE.LineBasicMaterial({ color: C_AQUA, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false })); pedestal.add(pedTicks);
@@ -627,7 +632,7 @@
     dockBtns.forEach(function (b, m) { var d = b.querySelectorAll('.dots i'), all = true; for (var n = 0; n < 5; n++) { d[n].className = visited[vKey(m, n)] ? 'on' : ''; if (!visited[vKey(m, n)]) all = false; } b.classList.toggle('done', all); });
     elProg.innerHTML = 'Explored <b>' + countSeen() + '</b> / ' + TOTAL;
   }
-  function letters(name) { var h = ''; for (var i = 0; i < name.length; i++) { var c = name[i]; h += c === ' ' ? ' ' : '<span class="ch" style="animation-delay:' + (i * 38) + 'ms">' + c + '</span>'; } return h + '<b class="ch" style="animation-delay:' + (name.length * 38) + 'ms">.</b>'; }
+  function letters(name) { var h = ''; var ls = name.lastIndexOf(' ') + 1; for (var i = 0; i < name.length; i++) { var c = name[i]; h += c === ' ' ? ' ' : '<span class="ch' + (i >= ls ? ' stix' : '') + '" style="animation-delay:' + (i * 38) + 'ms">' + c + '</span>'; } return h + '<b class="ch" style="animation-delay:' + (name.length * 38) + 'ms">.</b>'; }
   function buildHotspots() {
     elHs.innerHTML = ''; hsEls = []; hsPos = [];
     MOTIFS[cur].notes.forEach(function (n, i) {
@@ -728,6 +733,7 @@
   /* ---------- frame loop ---------- */
   function frame(now) {
     if (!L3.running) return; requestAnimationFrame(frame);
+    var wantLT = ProtoTheme.isOn(); if (wantLT !== themeSeen) { themeSeen = wantLT; if (wantLT || scene.userData.themed) { scene.userData.themed = true; setTheme(wantLT); } }
     var dt = Math.min(window.__lshcCap || 0.1, (now - lastT) / 1000); lastT = now; if (!(dt >= 0)) dt = 0.016; TT += dt;
     if (typing) {
       var ty = typing, len = ty.text.length, nc, done;
@@ -742,7 +748,7 @@
     var nowMs = performance.now();
     if (ready3 && !attract && !tour && cur >= 0 && nowMs - lastTouch > 30000) { attract = true; atStep = -2; atNext = nowMs + 400; elAttract.classList.add('on'); }
     if (attract && nowMs >= atNext && tw.phase === 'idle') { atStep++; if (atStep === -1) { say('Psst…', LCONTENT.idle, 'idle'); atNext = nowMs + 7000; } else if (atStep > 4) { atStep = -1; setMotif((cur + 1) % NM); atNext = nowMs + 9000; } else { select(atStep); atNext = nowMs + 11000; } }
-    if (cur < 0) { if (composer) composer.render(); else renderer.render(scene, camera); return; }
+    if (cur < 0) { if (composer && !LT) composer.render(); else renderer.render(scene, camera); return; }
 
     /* screen switch tween */
     if (tw.phase === 'out') { tw.t += dt / 0.3; var gO = motifs[cur].group; gO.scale.setScalar(Math.max(0.001, 1 - tw.t * tw.t)); twRot = tw.t * tw.t * 2.2; if (tw.t >= 1) { commit(tw.next); tw.phase = 'in'; tw.t = 0; } }
@@ -764,8 +770,8 @@
     if (ambStars) ambStars.rotation.y = TT * 0.01;
     accCur.lerp(accTgt, Math.min(1, dt * 3));
     if (rimL) { rimL.color.copy(accCur); rimL.intensity = 1.4 + 0.25 * Math.sin(TT * 1.3); }
-    if (pedestal) { pedTicks.rotation.y = TT * 0.35; pedTicks.material.color.copy(accCur); pedRings.forEach(function (r, i) { r.material.color.copy(accCur); r.material.opacity = 0.18 + 0.3 * (0.5 + 0.5 * Math.sin(TT * 1.6 - i * 0.9)); r.scale.setScalar(1 + 0.03 * Math.sin(TT * 1.6 - i * 0.9)); }); }
-    if (rainPts) { rainPts.material.color.copy(accCur); for (var rq = 0; rq < rainSpd.length; rq++) { var ry = rainPos[rq * 3 + 1] + rainSpd[rq] * dt * (1 + kick * 2); if (ry > 5.5) ry -= 11; rainPos[rq * 3 + 1] = ry; } rainPts.geometry.attributes.position.needsUpdate = true; }
+    if (pedestal) { pedTicks.rotation.y = TT * 0.35; pedTicks.material.color.copy(accCur); if (LT) pedTicks.material.color.multiplyScalar(0.55); pedRings.forEach(function (r, i) { r.material.color.copy(accCur); if (LT) r.material.color.multiplyScalar(0.55); r.material.opacity = 0.18 + 0.3 * (0.5 + 0.5 * Math.sin(TT * 1.6 - i * 0.9)); r.scale.setScalar(1 + 0.03 * Math.sin(TT * 1.6 - i * 0.9)); }); }
+    if (rainPts) { rainPts.material.color.copy(accCur); if (LT) rainPts.material.color.multiplyScalar(0.55); for (var rq = 0; rq < rainSpd.length; rq++) { var ry = rainPos[rq * 3 + 1] + rainSpd[rq] * dt * (1 + kick * 2); if (ry > 5.5) ry -= 11; rainPos[rq * 3 + 1] = ry; } rainPts.geometry.attributes.position.needsUpdate = true; }
     statT -= dt; if (statT <= 0 && statEls.length) { statT = 0.12; statEls.forEach(function (e) { var v = String(e.s.f(TT)); if (v !== e.last) { e.last = v; e.v.textContent = v; } e.bar.style.transform = 'scaleX(' + clamp(e.s.p(TT), 0.03, 1).toFixed(3) + ')'; }); }
     kick *= Math.exp(-dt * 2.6); if (bloom) bloom.strength = 0.26 + kick * 0.28 + amp * 0.04 * (0.5 + 0.5 * Math.sin(TT * 9));
     ambT -= dt; if (ambT < 0 && !RM) { ambT = 0.5 + Math.random() * 0.7; var aa = Math.random() * PI2, ab = Math.acos(2 * Math.random() - 1); burst(Math.sin(ab) * Math.cos(aa) * 1.6, Math.cos(ab) * 1.6, Math.sin(ab) * Math.sin(aa) * 1.6, 1, 0.1, 1.6, [C_AQUA]); }
@@ -781,7 +787,7 @@
       elConnP.setAttribute('d', 'M' + hp[0].toFixed(1) + ' ' + hp[1].toFixed(1) + ' C' + hp[0].toFixed(1) + ' ' + cy2.toFixed(1) + ' ' + tx.toFixed(1) + ' ' + (cy2 - 40).toFixed(1) + ' ' + tx.toFixed(1) + ' ' + ctop);
       elConnP.setAttribute('stroke-dashoffset', (1 - eIO(connT)).toFixed(3)); elConnP.style.opacity = 0.9; elConnD.setAttribute('cx', tx.toFixed(1)); elConnD.setAttribute('cy', ctop); elConnD.style.opacity = connT >= 1 ? 1 : 0;
     } else if (elConnP && (connT < 0 || sel < 0 || tw.phase !== 'idle')) { elConnP.style.opacity = 0; elConnD.style.opacity = 0; }
-    if (composer) composer.render(); else renderer.render(scene, camera);
+    if (composer && !LT) composer.render(); else renderer.render(scene, camera);
   }
   window.__lshc = { enter: enterL, leave: leaveL, idle: function () { lastTouch = 0; }, state: function () { return { cur: cur, sel: sel, ok: L3.ok, failed: L3.failed, tris: renderer ? renderer.info.render.triangles : 0, calls: renderer ? renderer.info.render.calls : 0 }; } };
 

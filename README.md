@@ -1,4 +1,4 @@
-# Innovation Orbit + LSHC Experience Arena (Bengaluru)
+# Innovation Orbit + LSHC Experience Arena (Hyderabad)
 
 Kiosk experience for a 1080 x 1920 portrait display (Proto M2). Open `index.html` in Chrome or Edge.
 Double-clicking works. For best results serve it, e.g. in VS Code with the Live Server extension.
@@ -15,6 +15,9 @@ Double-clicking works. For best results serve it, e.g. in VS Code with the Live 
 - Captions are immediately readable; narration still has its own progress indicator and audio toggle. Home returns to the experience selector.
 - Hidden screens are inert. Topic navigation supports Left/Right, Home, and End keys; controls stay fixed rather than following pointer parallax. Topic buttons briefly disable during scene transitions.
 - Reduced-motion preferences disable CSS animations and transitions. The existing 3D reduced-motion behavior is retained.
+
+## Display style: Normal or Proto (Proto M2)
+The home and start screens have a **Normal | Proto** switch (`js/mode.js`, remembered in the browser). Normal is the original dark design. Proto adds `body.proto`, which `css/hologram.css` and `js/proto-theme.js` use to put everything on white: off-white cards with dark text and layered depth shadows, and the 3D scenes re-rendered on white (normal blending, darker colours, soft floor shadow, no bloom). Proto is a transparent display where dark reads as see-through and light reads as solid. Headlines use one Stix Two Text italic word (class `stix`). Normal mode is untouched by these files. Shadow and tap-target values are estimates (`--hx-float`, `--hx-child`, `--hx-inset`; controls are at least 88 px); check them against the Proto guide on the device.
 
 ## Verification
 Run the hermetic navigation/media-controller tests and local-source branding checks with Node.js 22 or newer:
@@ -43,7 +46,7 @@ Media checks: switch both backgrounds, pause/resume, open the start screen, veri
 
 ## Where to change things
 - Screen text: `js/lshc-content.js`. The voice will NOT change with the text, it is recorded audio.
-- City name: search `Bengaluru` in `index.html`.
+- City name: search `Hyderabad` in `index.html`.
 - Screen builders in `js/lshc-experience.js`: `buildBody`, `buildMolecule`, `buildCell`, `buildImaging`, `buildGlobe`, `buildGenome`, `buildJourney`.
 - Topic accent colours and the simulated live readouts (decorative values, not real data) are `ACC` and `STATS` in the same file. The Precision Medicine and Patient Journey topics have captions only; record narration clips as `genome-0..5` and `journey-0..5` to add voice.
 - Idle attract mode starts after 30 seconds without touch.

@@ -1,0 +1,208 @@
+/* Proto M2 hologram skin, applied only when <body class="proto"> (chosen at the start screen).
+   Proto is a transparent display: dark is see-through, light surfaces read as solid and float.
+   So Proto mode is white with layered depth shadows; the 3D scenes sit in a floating window card.
+   Normal mode never loads any of these rules. */
+:root {
+  --hx-card: #f6f7fb;
+  --hx-card2: #e8ebf2;
+  --hx-ink: #1b1f1b;
+  --hx-sub: #4f574f;
+  --hx-line: rgba(20, 24, 20, 0.1);
+  --hx-green: #86bc25;
+  --hx-neon: #86eb22;
+  --hx-green-d: #4f7a0d;
+  --hx-float: 0 2px 3px rgba(0, 0, 0, 0.14), -12px 40px 36px rgba(0, 0, 0, 0.32);
+  --hx-child: 0 1px 3px rgba(0, 0, 0, 0.22), 0 8px 14px rgba(0, 0, 0, 0.24);
+  --hx-inset: inset 0 3px 6px rgba(0, 0, 0, 0.22);
+  --hx-edge: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --stix: "STIX Two Text", Georgia, "Times New Roman", serif;
+}
+
+/* always-on: these only affect the new markup, so Normal mode looks exactly as before */
+i.stix { font-style: normal; font-family: inherit; }
+.hx-window { display: none; }
+.mode-sel { display: flex; align-items: center; gap: 6px; height: 88px; padding: 6px; border-radius: 26px; border: 1px solid rgba(255, 255, 255, 0.28); background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.025)), rgba(15, 28, 18, 0.28); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 8px 24px rgba(0, 0, 0, 0.12); -webkit-backdrop-filter: blur(28px) saturate(140%); backdrop-filter: blur(28px) saturate(140%); }
+.mode-sel button { min-width: 118px; height: 72px; padding: 0 18px; border: 0; border-radius: 20px; background: none; font-size: 24px; font-weight: 600; color: #c8d4c3; }
+.mode-sel button[aria-pressed="true"] { background: rgba(220, 241, 191, 0.9); color: #182810; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7); }
+.mode-sel button:focus-visible { outline: 4px solid #fff; outline-offset: 3px; }
+.hub-toolbar .mode-sel { margin-left: auto; }
+.hub-toolbar .mode-sel + .background-controls { margin-left: 0; }
+.idle-mode { position: absolute; z-index: 3; top: 60px; left: 50%; transform: translateX(-50%); }
+
+/* ---------- Proto: shared component skin ---------- */
+body.proto #card, body.proto #lcard, body.proto #bar, body.proto #ldock, body.proto .door, body.proto .st, body.proto #ltoast, body.proto #llayers .chip {background: var(--hx-card); color: var(--hx-ink); border: 1px solid var(--hx-line);
+  box-shadow: var(--hx-edge), var(--hx-float); -webkit-backdrop-filter: none; backdrop-filter: none;}
+body.proto #card {border-top: 4px solid var(--hx-green);}
+body.proto #lcard {border-top: 4px solid var(--acc);}
+body.proto #ctitle, body.proto #lctitle {color: var(--hx-ink);}
+body.proto #ctext, body.proto #lctext {color: #2b312b;}
+body.proto #vbar, body.proto #lvbar {background: rgba(0, 0, 0, 0.1);}
+body.proto #wave i {background: var(--hx-green-d);}
+body.proto #lwave i {background: var(--acc);}
+body.proto #card.pulse {animation: hxPulse 0.9s ease-out;}
+@keyframes hxPulse { 0% { box-shadow: var(--hx-edge), var(--hx-float), 0 0 0 4px rgba(134, 188, 37, 0.55); } }
+body.proto #lcard.pulse {animation: hxPulseL 0.9s ease-out;}
+@keyframes hxPulseL { 0% { box-shadow: var(--hx-edge), var(--hx-float), 0 0 0 4px color-mix(in srgb, var(--acc) 60%, transparent); } }
+body.proto #voice, body.proto #lvoice, body.proto .homebtn, body.proto #tour, body.proto #ltour, body.proto .glass-icon, body.proto .background-controls {background: var(--hx-card); color: var(--hx-ink); border: 1px solid var(--hx-line);
+  box-shadow: var(--hx-edge), var(--hx-child); -webkit-backdrop-filter: none; backdrop-filter: none;}
+body.proto #voice, body.proto #lvoice {width: 88px; height: 88px;}
+body.proto #voice[aria-pressed="true"], body.proto #lvoice[aria-pressed="true"] {background: #e3f1c6; color: var(--hx-green-d); border-color: rgba(79, 122, 13, 0.4);}
+body.proto .homebtn svg {stroke: var(--hx-ink);}
+body.proto #tour svg {fill: var(--hx-green-d);}
+body.proto #ltour svg {fill: var(--hx-ink);}
+body.proto #tour[aria-pressed="true"], body.proto #ltour[aria-pressed="true"] {background: var(--hx-green); color: var(--hx-ink); box-shadow: var(--hx-inset);}
+body.proto #tour[aria-pressed="true"] svg, body.proto #ltour[aria-pressed="true"] svg {fill: var(--hx-ink);}
+body.proto #ltour[aria-pressed="true"] {background: var(--acc);}
+body.proto .homebtn:active, body.proto #voice:active, body.proto #lvoice:active, body.proto #tour:active, body.proto #ltour:active, body.proto .glass-icon:active {box-shadow: var(--hx-inset); transform: scale(0.97);}
+body.proto .glass-icon img {filter: none;}
+body.proto .background-controls {padding: 6px;}
+body.proto .background-controls .glass-icon {background: none; border: 0; border-left: 1px solid var(--hx-line); box-shadow: none; border-radius: 0 20px 20px 0;}
+body.proto .bg-selector span {color: var(--hx-sub);}
+body.proto .bg-selector input:checked + span {background: var(--hx-green); color: var(--hx-ink); box-shadow: var(--hx-child);}
+body.proto .hub-brand {text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);}
+body.proto #act, body.proto #lact {color: var(--hx-ink); border: 1px solid rgba(255, 255, 255, 0.7); box-shadow: var(--hx-edge), var(--hx-child), 0 14px 30px rgba(0, 0, 0, 0.25); text-shadow: none;}
+body.proto #act:active, body.proto #lact:active, body.proto .door:active .go {box-shadow: var(--hx-inset);}
+body.proto #act.fired, body.proto #lact.fired {color: var(--hx-ink); filter: brightness(1.12);}
+body.proto #act svg, body.proto #lact svg {fill: currentColor;}
+body.proto #bar, body.proto #ldock {padding: 10px; border-radius: 36px;}
+body.proto #pill, body.proto #lpill {box-shadow: var(--hx-edge), var(--hx-child);}
+body.proto #pill {background: linear-gradient(110deg, #86bc25, #86eb22);}
+body.proto .topic {color: var(--hx-sub);}
+body.proto .topic svg, body.proto #ldock .topic svg {color: #55604f;}
+body.proto .topic[aria-selected="true"], body.proto .topic[aria-selected="true"] svg, body.proto #ldock .topic[aria-selected="true"] svg {color: #14190f;}
+body.proto .dots i {background: rgba(0, 0, 0, 0.14);}
+body.proto .dots i.on {background: var(--hx-green-d);}
+body.proto .topic[aria-selected="true"] .dots i {background: rgba(0, 0, 0, 0.22);}
+body.proto .topic[aria-selected="true"] .dots i.on {background: #14190f;}
+body.proto #ldock .topic.done::after {background: var(--hx-green-d); box-shadow: none;}
+body.proto #ldock .topic[aria-selected="true"].done::after {background: #14190f;}
+body.proto .topic b {font-weight: 700;}
+body.proto .hs span {background: var(--hx-card); color: var(--hx-ink); border: 1px solid var(--hx-line); text-shadow: none; box-shadow: var(--hx-edge), var(--hx-child); -webkit-backdrop-filter: none; backdrop-filter: none;}
+body.proto .hs.seen span {color: var(--hx-sub);}
+body.proto .hs.on span, body.proto #lshc .hs.on span {background: #fff; color: var(--hx-ink); border-color: var(--hx-green); box-shadow: var(--hx-edge), var(--hx-child), 0 0 0 3px rgba(134, 188, 37, 0.45);}
+body.proto #lshc .hs.on span {border-color: var(--acc); box-shadow: var(--hx-edge), var(--hx-child), 0 0 0 3px color-mix(in srgb, var(--acc) 50%, transparent);}
+body.proto .st .sl, body.proto .st .su {color: var(--hx-sub);}
+body.proto .st .sv {color: var(--hx-ink); text-shadow: none;}
+body.proto .st .sb {background: rgba(0, 0, 0, 0.1);}
+body.proto #ltoast {color: var(--hx-ink);}
+body.proto #ltoast b {color: var(--hx-green-d);}
+body.proto #llayers .chip {color: var(--hx-sub);}
+body.proto #llayers .chip[aria-pressed="true"] {color: var(--hx-ink); background: #fff; border-color: var(--acc); box-shadow: var(--hx-edge), var(--hx-child), 0 0 0 2px color-mix(in srgb, var(--acc) 45%, transparent);}
+body.proto .door {border-radius: 30px;}
+body.proto .door .k {color: var(--hx-green-d); font-weight: 700;}
+body.proto .door-lshc .k {color: #0a6e96;}
+body.proto .door h2 {color: var(--hx-ink); max-width: 460px;}
+body.proto .door-inno h2 b, body.proto .door-lshc h2 b {color: var(--hx-green-d);}
+body.proto .door-lshc h2 b {color: #0a6e96;}
+body.proto .door p {color: #2f362f; max-width: 440px;}
+body.proto .door .go {color: var(--hx-ink); box-shadow: var(--hx-edge), var(--hx-child);}
+body.proto .door-lshc .go {background: linear-gradient(125deg, #5cc8f2, #00a3e0);}
+body.proto .door .preview {z-index: 0; right: 26px; top: 26px; width: 380px; height: calc(100% - 52px); border-radius: 22px; background: #0f130f; mix-blend-mode: normal; mask-image: none; -webkit-mask-image: none; object-fit: cover; box-shadow: var(--hx-inset);}
+body.proto .door::before {z-index: 1;}
+body.proto .door > *:not(.preview):not(.art) {position: relative; z-index: 1;}
+@media (hover: hover) {
+body.proto .door:hover {border-color: var(--hx-green); box-shadow: var(--hx-edge), var(--hx-float), 0 0 0 3px rgba(134, 188, 37, 0.45);}
+body.proto .homebtn:hover, body.proto #tour:hover, body.proto #ltour:hover, body.proto #voice:hover, body.proto #lvoice:hover, body.proto .glass-icon:hover {background: #fff;}
+body.proto .topic:not([aria-selected="true"]):hover {background: rgba(0, 0, 0, 0.05);}
+}
+
+/* ---------- Proto stage: all white, scenes in a floating window ---------- */
+body.proto { background: #eef1f6; }
+body.proto #stage, body.proto #lshc { background: linear-gradient(180deg, #f8f9fc, #eceff5); }
+body.proto #fxo, body.proto #fxo .sw { display: none; }
+body.proto .hx-window { display: block; position: absolute; z-index: 0; left: 40px; right: 40px; top: 372px; height: 778px; border-radius: 36px; background: radial-gradient(ellipse at 50% 40%, #16201a, #0b100d); box-shadow: var(--hx-float), 0 0 0 1px rgba(0, 0, 0, 0.12); }
+body.proto #gl, body.proto #lgl { clip-path: inset(372px 40px 770px 40px round 36px); }
+body.proto #conn, body.proto #lconn { z-index: 4; }
+body.proto #connp, body.proto #lconnp { stroke: var(--hx-green-d); filter: none; }
+body.proto #connd, body.proto #lconnd { fill: var(--hx-green-d); filter: none; }
+body.proto #lstat { top: 392px; left: 64px; right: 64px; }
+body.proto #llayers { left: 60px; top: 680px; }
+body.proto #lstat::after { color: rgba(255, 255, 255, 0.75); }
+body.proto .eyebrow { color: var(--hx-sub); }
+body.proto #num, body.proto #lnum { color: var(--hx-green-d); }
+body.proto #num::after, body.proto #lnum::after { background: var(--hx-green-d); }
+body.proto #lnum { color: color-mix(in srgb, var(--acc) 62%, #000); }
+body.proto #lnum::after { background: color-mix(in srgb, var(--acc) 62%, #000); }
+body.proto #num i, body.proto #lnum i { color: rgba(60, 70, 60, 0.6); }
+body.proto .toprow { border-bottom-color: rgba(20, 24, 20, 0.14); }
+body.proto .lhead .toprow::after { background: linear-gradient(90deg, transparent 0%, var(--hx-green) 30%, var(--hx-neon) 50%, var(--hx-green) 70%, transparent 100%); background-size: 200% 100%; }
+body.proto #title, body.proto #ltitle { color: var(--hx-ink); }
+body.proto #title b, body.proto #ltitle b { color: var(--hx-green-d); }
+body.proto #ltitle b { color: color-mix(in srgb, var(--acc) 62%, #000); }
+body.proto #tag, body.proto #ltag { color: var(--hx-sub); }
+body.proto .foot { color: var(--hx-sub); }
+body.proto #prog, body.proto #lprog { color: var(--hx-ink); }
+body.proto #prog b { color: var(--hx-green-d); }
+body.proto #lprog b { color: color-mix(in srgb, var(--acc) 62%, #000); }
+body.proto #lload { background: #eef1f6; color: var(--hx-sub); }
+body.proto #lload i { border-color: rgba(0, 0, 0, 0.1); border-top-color: var(--hx-green-d); }
+body.proto .rip { border-color: var(--hx-green-d); box-shadow: none; }
+body.proto .stix, body.proto .stix.ch { font-family: var(--stix); font-style: italic; font-weight: 600; letter-spacing: 0; }
+body.proto i.stix { font-style: italic; font-family: var(--stix); }
+
+/* ---------- Proto home: white canvas, no video ---------- */
+body.proto #hub { background: linear-gradient(180deg, #f8f9fc, #e9edf4); }
+body.proto #hub::before { display: none; }
+body.proto .home-video, body.proto .background-controls, body.proto #mediaStatus { display: none; }
+body.proto .hub-toolbar { border-bottom-color: rgba(20, 24, 20, 0.14); }
+body.proto .hub-brand { color: var(--hx-ink); text-shadow: none; }
+body.proto .hub-brand b { color: var(--hx-green-d); }
+body.proto #hub h1 { color: var(--hx-ink); text-shadow: none; }
+body.proto #hub h1 b { color: var(--hx-green-d); }
+body.proto #hub > p { color: var(--hx-sub); }
+body.proto #hub .hubfoot { color: var(--hx-sub); border-top-color: rgba(20, 24, 20, 0.14); }
+body.proto .mode-sel { background: var(--hx-card); border: 1px solid var(--hx-line); box-shadow: var(--hx-edge), var(--hx-child); -webkit-backdrop-filter: none; backdrop-filter: none; }
+body.proto .mode-sel button { color: var(--hx-sub); }
+body.proto .mode-sel button[aria-pressed="true"] { background: var(--hx-green); color: var(--hx-ink); box-shadow: var(--hx-child); }
+body.proto .door { background: #fff; }
+body.proto .door-lshc .go { background: linear-gradient(125deg, #5cc8f2, #00a3e0); }
+body.proto .glass-icon { background: #fff; }
+
+/* ---------- no coloured full stops in headlines: same colour as the text (white), or black in Proto ---------- */
+#title b, #ltitle b, #hub h1 b, .door h2 b, .door-inno h2 b, .door-lshc h2 b, .idle-title b, #splash h1 b, .hub-brand b { color: inherit !important; }
+body.proto #title b, body.proto #ltitle b, body.proto #hub h1 b, body.proto .door h2 b, body.proto .door-inno h2 b, body.proto .door-lshc h2 b, body.proto .hub-brand b { color: #000 !important; }
+
+/* ---------- Proto: everything on white, including the 3D scenes (no dark window) ---------- */
+body.proto .hx-window { display: none; }
+body.proto #gl, body.proto #lgl { clip-path: none; }
+body.proto #stage, body.proto #lshc { background: #eef1f6; }
+body.proto #lstat { top: 372px; left: 32px; right: 32px; }
+body.proto #lstat::after { color: var(--hx-sub); }
+body.proto #lstat::before { background: var(--hx-green-d); box-shadow: none; }
+body.proto #llayers { left: 32px; top: 660px; }
+body.proto .hs i { background: var(--hx-green-d); box-shadow: 0 0 0 5px rgba(79, 122, 13, 0.18), 0 4px 10px rgba(0, 0, 0, 0.3); }
+body.proto .hs i::after { border-color: rgba(79, 122, 13, 0.7); }
+body.proto .hs.seen i { background: #fff; border-color: var(--hx-green-d); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25); }
+body.proto .hs.on i { background: #1b1f1b; box-shadow: 0 0 0 6px rgba(27, 31, 27, 0.18), 0 4px 10px rgba(0, 0, 0, 0.3); }
+body.proto .hs span::before { background: rgba(20, 24, 20, 0.45); }
+body.proto #lsweep { mix-blend-mode: normal; }
+
+/* ---------- Proto home: light scene previews in inset wells, floating cards ---------- */
+body.proto .door-inno .preview { content: url(../assets/innovation-preview-proto.png); }
+body.proto .door-lshc .preview { content: url(../assets/lshc-preview-proto.png); }
+body.proto .door .preview { background: #eef1f6; box-shadow: var(--hx-inset); }
+body.proto .door::before { display: none; }
+body.proto .door { animation: glassEnter 0.8s ease-out both, hxFloat 7s ease-in-out 0.9s infinite; }
+body.proto .door:nth-child(2) { animation-delay: 0.12s, 2.4s; }
+@keyframes hxFloat { 50% { transform: translateY(-8px); } }
+body.proto .hubfoot { border-top-color: rgba(20, 24, 20, 0.14); }
+
+/* ---------- Proto home v2: no cards. Each experience is a model floating over a projector base, with text on the white page ---------- */
+body.proto .doors { gap: 8px; margin-top: 40px; }
+body.proto .door { background: none; border: 0; box-shadow: none; border-radius: 0; height: 600px; padding: 40px 6px; animation: glassEnter 0.8s ease-out both; overflow: visible; }
+body.proto .door:nth-child(2) { animation-delay: 0.12s; }
+body.proto .door + .door { border-top: 1px solid rgba(20, 24, 20, 0.12); }
+body.proto .door h2 { font-size: 66px; max-width: 480px; }
+body.proto .door p { font-size: 28px; max-width: 420px; }
+body.proto .door .go { width: 250px; height: 84px; border-radius: 42px; }
+body.proto .door .preview { z-index: 1; right: -6px; top: 28px; width: 500px; height: 520px; border-radius: 0; background: none; box-shadow: none; object-fit: contain; animation: hxHover 6.5s ease-in-out infinite; filter: drop-shadow(0 18px 14px rgba(10, 20, 10, 0.22)); }
+body.proto .door:nth-child(2) .preview { animation-delay: -3s; }
+body.proto .door::before { display: block; content: ""; position: absolute; z-index: 0; left: auto; top: auto; right: 24px; bottom: 34px; width: 470px; height: 64px; border-radius: 50%; border: 2px solid rgba(79, 122, 13, 0.4); background: radial-gradient(ellipse at center, rgba(10, 20, 10, 0.3), rgba(10, 20, 10, 0) 70%); box-shadow: 0 0 0 16px rgba(79, 122, 13, 0.08), 0 0 0 34px rgba(79, 122, 13, 0.05); opacity: 1; }
+body.proto .door-lshc::before { border-color: rgba(10, 110, 150, 0.4); box-shadow: 0 0 0 16px rgba(0, 163, 224, 0.08), 0 0 0 34px rgba(0, 163, 224, 0.05); }
+body.proto .door::after { content: ""; position: absolute; z-index: 0; right: 120px; bottom: 54px; width: 290px; height: 34px; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(10, 20, 10, 0.34), rgba(10, 20, 10, 0) 72%); animation: hxShadow 6.5s ease-in-out infinite; }
+body.proto .door:nth-child(2)::after { animation-delay: -3s; }
+@keyframes hxHover { 50% { transform: translateY(-18px); } }
+@keyframes hxShadow { 50% { transform: scale(0.82); opacity: 0.7; } }
+@media (hover: hover) { body.proto .door:hover { border-color: transparent; box-shadow: none; transform: none; } body.proto .door:hover .preview { transform: scale(1.03); } body.proto .door + .door:hover { border-top-color: rgba(20, 24, 20, 0.12); } }
+body.proto .door:focus-visible { outline: 4px solid var(--hx-green-d); outline-offset: -8px; border-radius: 24px; }
+body.proto .door p { max-width: 520px; }

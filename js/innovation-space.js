@@ -107,6 +107,8 @@
     }
   } catch (e) { composer = null; bloom = null; }
 
+  var LT = false, themeSeen = false, themed = false, floorShadow = null, savedBg = null;
+  function setTheme(on) { LT = on; ProtoTheme.apply(scene, on); renderer.setClearColor(on ? ProtoTheme.BG_HEX : 0x080b09, 1); if (bloom) bloom.enabled = !on; if (floorShadow) floorShadow.visible = on; if (on) { if (!savedBg) savedBg = scene.background; scene.background = new THREE.Color(ProtoTheme.BG_HEX); } else if (savedBg) scene.background = savedBg; }
   /* ---------- helpers ---------- */
   var C = function (h) { return new THREE.Color(h); };
   var GREEN = C(0x86bc25), LIME = C(0xc4d600), TEAL = C(0x0097a9), AQUA = C(0x5fd4e3), ORANGE = C(0xed8b00), SOFT = C(0x1b6f63), PAPER = C(0xf1f6ec);
@@ -139,9 +141,9 @@
   }
   function fresnel(color, power, opacity) {
     return new THREE.ShaderMaterial({
-      uniforms: { c: { value: new THREE.Color(color) }, p: { value: power }, o: { value: opacity } },
+      uniforms: { c: { value: new THREE.Color(color) }, p: { value: power }, o: { value: opacity }, uLight: { value: 0 } },
       vertexShader: 'varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix * vec4(position,1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }',
-      fragmentShader: 'uniform vec3 c; uniform float p; uniform float o; varying vec3 vN; varying vec3 vV; void main(){ float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), p); gl_FragColor = vec4(c * f * 1.5, f * o); }',
+      fragmentShader: 'uniform vec3 c; uniform float p; uniform float o; uniform float uLight; varying vec3 vN; varying vec3 vV; void main(){ float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), p); if (uLight > 0.5) { gl_FragColor = vec4(c * 0.6, min(1.0, f * o * 1.6)); } else { gl_FragColor = vec4(c * f * 1.5, f * o); } }',
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
     });
   }
@@ -645,16 +647,16 @@
     for (var i = 0; i < FXN; i++) {
       if (fxL[i] <= 0) continue;
       fxL[i] -= fxD[i] * dt;
-      if (fxL[i] <= 0) { fxP[i * 3 + 1] = 999; fxC[i * 3] = fxC[i * 3 + 1] = fxC[i * 3 + 2] = 0; continue; }
+      if (fxL[i] <= 0) { fxP[i * 3 + 1] = 999; if (LT) { fxC[i * 3] = ProtoTheme.BG[0]; fxC[i * 3 + 1] = ProtoTheme.BG[1]; fxC[i * 3 + 2] = ProtoTheme.BG[2]; } else fxC[i * 3] = fxC[i * 3 + 1] = fxC[i * 3 + 2] = 0; continue; }
       fxV[i * 3] *= drag; fxV[i * 3 + 1] *= drag; fxV[i * 3 + 2] *= drag;
       fxP[i * 3] += fxV[i * 3] * dt; fxP[i * 3 + 1] += fxV[i * 3 + 1] * dt; fxP[i * 3 + 2] += fxV[i * 3 + 2] * dt;
-      var f = fxL[i] * fxL[i]; fxC[i * 3] = fxB[i * 3] * f; fxC[i * 3 + 1] = fxB[i * 3 + 1] * f; fxC[i * 3 + 2] = fxB[i * 3 + 2] * f;
+      var f = fxL[i] * fxL[i]; if (LT) { for (var q = 0; q < 3; q++) fxC[i * 3 + q] = ProtoTheme.BG[q] + (fxB[i * 3 + q] * 0.55 - ProtoTheme.BG[q]) * f; } else { fxC[i * 3] = fxB[i * 3] * f; fxC[i * 3 + 1] = fxB[i * 3 + 1] * f; fxC[i * 3 + 2] = fxB[i * 3 + 2] * f; }
     }
     fxGeo.attributes.position.needsUpdate = true; fxGeo.attributes.color.needsUpdate = true;
   }
   var fxRings = [], fxRn = 0;
   for (var ri = 0; ri < 8; ri++) { var rm = new THREE.Mesh(new THREE.RingGeometry(0.985, 1, 96), new THREE.MeshBasicMaterial({ color: 0x86bc25, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending })); rm.visible = false; rm.frustumCulled = false; scene.add(rm); fxRings.push({ m: rm, t: 1, max: 1 }); }
-  function ringAt(x, y, z, color, max) { var r = fxRings[(fxRn++) % fxRings.length]; r.t = 0; r.max = max; r.m.position.set(x, y, z); r.m.material.color.set(color); r.m.visible = true; }
+  function ringAt(x, y, z, color, max) { var r = fxRings[(fxRn++) % fxRings.length]; r.t = 0; r.max = max; r.m.position.set(x, y, z); r.m.material.color.set(color); if (LT) r.m.material.color.multiplyScalar(0.55); r.m.visible = true; }
   var streaks = [];
   for (var si = 0; si < 3; si++) { var sl = segs([0, 0, 0, 0, 0, 0], 0x5fd4e3, 0.8); sl.frustumCulled = false; scene.add(sl); streaks.push({ l: sl, wait: 1 + si * 2.2, on: false, x: 0, y: 0 }); }
   function streakStep(dt) {
@@ -794,7 +796,7 @@
   }
   function letters(name) {
     var h = '';
-    for (var i = 0; i < name.length; i++) { var c = name[i]; h += c === ' ' ? ' ' : '<span class="ch" style="animation-delay:' + (i * 38) + 'ms">' + c + '</span>'; }
+    var ls = name.lastIndexOf(' ') + 1; for (var i = 0; i < name.length; i++) { var c = name[i]; h += c === ' ' ? ' ' : '<span class="ch' + (i >= ls ? ' stix' : '') + '" style="animation-delay:' + (i * 38) + 'ms">' + c + '</span>'; }
     return h + '<b class="ch" style="animation-delay:' + (name.length * 38) + 'ms">.</b>';
   }
   var connT = -1, elConnP = $('connp'), elConnD = $('connd'), hsPos = [];
@@ -886,6 +888,7 @@
   /* ---------- frame loop ---------- */
   var ambT = 1, glitchT = 9, v3 = new THREE.Vector3(), rw = new THREE.Vector3(), clock = new THREE.Clock(), T = 0, amp = 0;
   function frame() {
+    var wantLT = ProtoTheme.isOn(); if (wantLT !== themeSeen) { themeSeen = wantLT; if (wantLT || themed) { themed = true; if (!floorShadow) { floorShadow = ProtoTheme.shadow(5, 2.6); floorShadow.position.y = -2.5; scene.add(floorShadow); } setTheme(wantLT); } }
     requestAnimationFrame(frame);
     if (window.__innoPaused) { clock.getDelta(); return; }
     var dt = Math.min(clock.getDelta(), 0.05); T += dt;
@@ -959,7 +962,7 @@
       elConnP.setAttribute('stroke-dashoffset', (1 - ease(connT)).toFixed(3)); elConnP.style.opacity = 0.9;
       elConnD.setAttribute('cx', tx.toFixed(1)); elConnD.setAttribute('cy', ctop); elConnD.style.opacity = connT >= 1 ? 1 : 0;
     } else if (connT < 0 || sel < 0 || tw.phase !== 'idle') { elConnP.style.opacity = 0; elConnD.style.opacity = 0; }
-    if (composer) composer.render(); else renderer.render(scene, camera);
+    if (composer && !LT) composer.render(); else renderer.render(scene, camera);
   }
   window.__orbit = { reset: function () {
     stopAudio(); sayTok++; if (tour) endTour(false); typing = null;

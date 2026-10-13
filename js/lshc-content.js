@@ -154,9 +154,9 @@ var LCONTENT = {
    "intro": "This is the global health network. Research, manufacturing and care now span the world, connected by data. Tap a glowing point, and let’s look closer.",
    "notes": [
     [
-     "Bengaluru",
-     "Connected from Bengaluru",
-     "From Bengaluru, teams connect with partners around the world, turning data into insight for patients everywhere."
+     "Hyderabad",
+     "Connected from Hyderabad",
+     "From Hyderabad, teams connect with partners around the world, turning data into insight for patients everywhere."
     ],
     [
      "Trial sites",
