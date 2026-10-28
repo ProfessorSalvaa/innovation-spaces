@@ -1,0 +1,117 @@
+/* Front Desk of the Future: Ava's hologram experience. Same portrait stage, glass and type as the other experiences; accent follows the chapter (--acc). */
+#fdesk { --acc: #3fc3ec; --acc2: #a0dcff; position: absolute; inset: 0; z-index: 50; display: none; opacity: 0; background: #05090a; transition: opacity 0.6s; overflow: hidden; }
+#fdesk.on { opacity: 1; }
+#fgl { position: absolute; inset: 0; z-index: 1; }
+#fgl canvas { display: block; }
+.fhead { position: absolute; z-index: 3; left: 60px; right: 60px; top: 54px; pointer-events: none; }
+.fhead .toprow { position: relative; border-bottom-color: rgba(255, 255, 255, 0.16); }
+.fhead .toprow::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: linear-gradient(90deg, transparent 0%, var(--acc) 30%, #fff 50%, var(--acc) 70%, transparent 100%); background-size: 200% 100%; animation: shimmer 4.5s linear infinite; }
+#fnum { font-weight: 700; font-size: 24px; white-space: nowrap; color: var(--acc); font-variant-numeric: tabular-nums; }
+#fnum i { font-style: normal; color: rgba(169, 194, 172, 0.55); }
+#fnum::after { content: ""; display: inline-block; width: 24px; height: 2px; margin: 0 0 6px 14px; vertical-align: middle; background: var(--acc); opacity: 0.6; }
+#ftitle { margin: 30px 0 0; font-weight: 700; font-size: 72px; line-height: 1.1; letter-spacing: -0.015em; text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); }
+#ftitle b { color: inherit; }
+#ftour, .fcc { pointer-events: auto; display: flex; align-items: center; gap: 12px; height: 88px; padding: 0 22px; border-radius: 26px; border: 1px solid var(--line); background: var(--glass); box-shadow: var(--glass-shadow); -webkit-backdrop-filter: blur(30px) saturate(140%); backdrop-filter: blur(30px) saturate(140%); font-weight: 600; font-size: 22px; color: var(--paper); transition: background 0.3s, color 0.3s; }
+#ftour svg { width: 24px; height: 24px; fill: var(--acc); }
+#ftour[aria-pressed="true"] { background: var(--acc); color: var(--ink); }
+#ftour[aria-pressed="true"] svg { fill: var(--ink); }
+.fcc { width: 88px; justify-content: center; padding: 0; font-weight: 800; font-size: 22px; letter-spacing: 0.04em; }
+.fcc[aria-pressed="true"] { background: var(--acc); color: var(--ink); }
+#fhs { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+#fdesk .hs.on span { color: var(--acc); border-color: var(--acc); }
+#fdesk .hs i { background: var(--acc); box-shadow: 0 0 0 5px color-mix(in srgb, var(--acc) 22%, transparent), 0 0 22px 4px color-mix(in srgb, var(--acc) 60%, transparent); }
+#fdesk .hs i::after { border-color: var(--acc); }
+#fdesk .hs.seen i { background: transparent; border: 3px solid var(--acc); }
+#fdesk .hs.on i { background: #fff; }
+#fdesk .fade-in, #fdesk .fhead, #fdesk #flower, #fdesk #fdock, #fdesk .foot { transition: opacity 0.9s, transform 0.9s; }
+#fdesk:not(.ready) .fhead, #fdesk:not(.ready) #flower, #fdesk:not(.ready) #fdock, #fdesk:not(.ready) .foot { opacity: 0; transform: translateY(30px); }
+
+/* lower stack: captions (only with CC), the action, and Ava's voice */
+#flower { position: absolute; z-index: 5; left: 60px; right: 60px; bottom: 312px; display: flex; flex-direction: column; align-items: center; gap: 22px; pointer-events: none; }
+#fcap { margin: 0; max-width: 900px; padding: 18px 28px; border-radius: 22px; background: rgba(5, 9, 10, 0.72); border: 1px solid var(--line); font-size: 30px; line-height: 1.45; text-align: center; color: #fff; display: none; min-height: 1em; }
+#fdesk.cc #fcap:not(:empty), #fdesk.cc-auto #fcap:not(:empty) { display: block; }
+#fact { pointer-events: auto; min-height: 92px; padding: 0 40px; display: flex; align-items: center; gap: 14px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.55); color: var(--ink); background: linear-gradient(110deg, var(--acc), var(--acc2)); font-weight: 700; font-size: 28px; box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 10px 28px rgba(0, 0, 0, 0.3), 0 0 40px color-mix(in srgb, var(--acc) 45%, transparent); transition: transform 0.25s, filter 0.25s; animation: factIn 0.7s 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+#fact[hidden] { display: none; }
+#fact svg { width: 26px; height: 26px; fill: currentColor; }
+#fact:active { transform: scale(0.96); }
+#fact.fired { filter: brightness(1.25); }
+@keyframes factIn { from { opacity: 0; transform: translateY(20px) scale(0.9); } }
+#fvoice { pointer-events: auto; display: flex; align-items: center; gap: 20px; height: 96px; padding: 0 12px 0 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--glass); box-shadow: var(--glass-shadow); -webkit-backdrop-filter: blur(34px) saturate(150%); backdrop-filter: blur(34px) saturate(150%); }
+#favatar { position: relative; width: 64px; height: 64px; border-radius: 50%; flex: none; background: radial-gradient(circle at 38% 32%, #fff 0%, var(--acc2) 26%, var(--acc) 56%, rgba(0, 0, 0, 0.6) 100%); box-shadow: 0 0 26px 4px color-mix(in srgb, var(--acc) 55%, transparent); }
+#fvoice.spk #favatar::after { content: ""; position: absolute; inset: -7px; border-radius: 50%; border: 2px solid var(--acc); animation: orbring 1.3s ease-out infinite; }
+#flabel { min-width: 120px; max-width: 360px; font-weight: 700; font-size: 28px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#flabel.rv { animation: ctIn 0.55s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+#fwave { height: 44px; display: flex; align-items: center; gap: 5px; }
+#fwave i { display: block; width: 5px; height: 44px; border-radius: 3px; background: var(--acc); transform: scaleY(0.1); }
+#fmute { width: 72px; height: 72px; flex: none; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.2); background: transparent; display: grid; place-items: center; color: var(--acc); }
+#fmute svg { width: 34px; height: 34px; }
+#fmute[aria-pressed="false"] { color: var(--mist); }
+#fmute[aria-pressed="false"] .w, #fmute[aria-pressed="true"] .x { display: none; }
+
+/* chapter dock */
+#fdock { position: absolute; z-index: 5; left: 40px; right: 40px; bottom: 112px; height: 172px; padding: 10px; display: grid; grid-template-columns: repeat(var(--nm, 7), minmax(0, 1fr)); border-radius: 36px; border: 1px solid var(--line); background: var(--glass); box-shadow: var(--glass-shadow); -webkit-backdrop-filter: blur(38px) saturate(150%); backdrop-filter: blur(38px) saturate(150%); }
+#fpill { position: absolute; left: 10px; top: 10px; bottom: 10px; width: calc((100% - 20px) / var(--nm, 7)); border-radius: 27px; background: linear-gradient(110deg, var(--acc), var(--acc2)); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 5px 18px rgba(0, 0, 0, 0.24); transition: transform 0.35s ease; pointer-events: none; }
+#fdock .topic { gap: 10px; }
+#fdock .topic svg { width: 40px; height: 40px; color: var(--mist); }
+#fdock .topic[aria-selected="true"] svg { color: var(--ink); animation: iconpop 0.7s cubic-bezier(0.3, 1.6, 0.5, 1); }
+#fdock .topic b { font-size: 19px; }
+#fdock .dots { gap: 3px; }
+#fdock .dots i { width: 9px; }
+#fdock .topic.done::after { content: ""; position: absolute; top: 14px; right: 12px; width: 12px; height: 12px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 12px var(--acc); }
+#fdock .topic[aria-selected="true"].done::after { background: var(--ink); box-shadow: none; }
+#fprog b { color: var(--acc); }
+#fdesk .foot { z-index: 3; }
+
+/* title: big for a moment, then it settles */
+#fdesk.ttl #ftitle { animation: ttlIn 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+@keyframes ttlIn { from { opacity: 0; transform: translateY(18px); filter: blur(8px); } }
+#fflash { position: absolute; inset: 0; z-index: 6; pointer-events: none; opacity: 0; background: radial-gradient(ellipse 700px 900px at 50% 45%, color-mix(in srgb, var(--acc) 30%, transparent), transparent 70%); }
+#fflash.on { animation: fflash 1s ease-out; }
+@keyframes fflash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+#fload { position: absolute; z-index: 8; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; background: #05090a; font-weight: 600; font-size: 28px; color: var(--acc); transition: opacity 0.7s; }
+#fload.off { opacity: 0; pointer-events: none; }
+#fload i { width: 84px; height: 84px; border-radius: 50%; border: 3px solid rgba(63, 195, 236, 0.2); border-top-color: var(--acc); animation: spin 1s linear infinite; }
+#fdesk .cf { z-index: 40; }
+#fdesk .rip { border-color: var(--acc); box-shadow: 0 0 18px color-mix(in srgb, var(--acc) 60%, transparent); }
+@media (hover: hover) { #ftour:hover, .fcc:hover, #fmute:hover { filter: brightness(1.15); } #fact:hover { filter: brightness(1.1); } }
+@media (prefers-reduced-motion: reduce) { .fhead .toprow::after, #fvoice.spk #favatar::after { animation: none !important; } }
+
+/* hub: three doors */
+.doors:has(.door-fd) { gap: 22px; margin-top: 44px; }
+.doors:has(.door-fd) .door { height: 400px; padding: 34px 42px; }
+.doors:has(.door-fd) .door h2 { margin-top: 16px; font-size: 52px; }
+.doors:has(.door-fd) .door p { margin-top: 12px; font-size: 25px; }
+.doors:has(.door-fd) .door .go { height: 70px; }
+.doors:has(.door-fd) .door .preview { top: -150px; right: -70px; }
+.door-fd .k { color: #ffc864 !important; }
+.door-fd:nth-child(3) { animation-delay: 0.24s; }
+#hub:has(.door-fd) h1 { margin-top: 30px; font-size: 76px; }
+
+/* ---------- Proto (white) ---------- */
+body.proto #fdesk, body.proto #fload { background: #eef1f6; color: var(--hx-ink); }
+body.proto #fdesk .toprow { border-bottom-color: rgba(20, 24, 20, 0.14); }
+body.proto .fhead .toprow::after { background: linear-gradient(90deg, transparent 0%, var(--hx-green) 30%, var(--hx-neon) 50%, var(--hx-green) 70%, transparent 100%); background-size: 200% 100%; }
+body.proto #ftitle { color: var(--hx-ink); text-shadow: none; }
+body.proto #fnum { color: color-mix(in srgb, var(--acc) 55%, #000); }
+body.proto #fnum::after { background: color-mix(in srgb, var(--acc) 55%, #000); }
+body.proto #ftour, body.proto .fcc, body.proto #fvoice, body.proto #fdock, body.proto #fcap { background: var(--hx-card); color: var(--hx-ink); border: 1px solid var(--hx-line); box-shadow: var(--hx-edge), var(--hx-child); -webkit-backdrop-filter: none; backdrop-filter: none; }
+body.proto #fdock, body.proto #fvoice { box-shadow: var(--hx-edge), var(--hx-float); }
+body.proto #ftour svg { fill: var(--hx-ink); }
+body.proto #ftour[aria-pressed="true"], body.proto .fcc[aria-pressed="true"] { background: var(--acc); color: var(--hx-ink); box-shadow: var(--hx-inset); }
+body.proto #fact { color: var(--hx-ink); box-shadow: var(--hx-edge), var(--hx-child), 0 14px 30px rgba(0, 0, 0, 0.25); }
+body.proto #fwave i { background: color-mix(in srgb, var(--acc) 60%, #000); }
+body.proto #fmute { color: var(--hx-ink); border-color: var(--hx-line); }
+body.proto #fdesk .foot { color: var(--hx-sub); }
+body.proto #fprog { color: var(--hx-ink); }
+body.proto #fdock .topic svg { color: #55604f; }
+body.proto #fdock .topic[aria-selected="true"] svg { color: #14190f; }
+body.proto #fdesk .hs i { background: color-mix(in srgb, var(--acc) 60%, #000); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); }
+body.proto #fdesk .hs.on span { color: var(--hx-ink); border-color: var(--acc); }
+body.proto .door-fd .preview { content: url(../assets/frontdesk-preview-proto.png); }
+body.proto .door-fd .k { color: #8a5a00 !important; }
+body.proto .doors:has(.door-fd) .door { height: 420px; padding: 28px 6px; }
+body.proto .doors:has(.door-fd) .door .preview { top: 10px; right: 0; width: 360px; height: 380px; }
+body.proto .doors:has(.door-fd) .door::before { width: 340px; right: 10px; bottom: 22px; height: 50px; }
+body.proto .doors:has(.door-fd) .door::after { right: 80px; bottom: 36px; width: 220px; }
+body.proto .doors:has(.door-fd) .door h2 { font-size: 54px; }
+body.proto .door-fd .preview { mix-blend-mode: multiply; }
