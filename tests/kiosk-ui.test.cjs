@@ -28,7 +28,7 @@ test('topic keys wrap and support Home and End', () => {
 
 function fixture() {
   const elements = {};
-  for (const id of ['hub', 'lshc', 'head', 'hs', 'lower', 'bar', 'splash', 'goInno', 'homeI', 'homeL']) {
+  for (const id of ['hub', 'lshc', 'fdesk', 'head', 'hs', 'lower', 'bar', 'splash', 'goInno', 'homeI', 'homeL', 'homeF']) {
     elements[id] = { inert: false, focus() { elements.focused = id; } };
   }
   return { elements, getElementById(id) { return elements[id]; } };
@@ -36,11 +36,12 @@ function fixture() {
 
 test('only the active experience is interactive and receives focus', () => {
   const document = fixture();
-  for (const [mode, focus] of [['hub', 'goInno'], ['inno', 'homeI'], ['lshc', 'homeL']]) {
+  for (const [mode, focus] of [['hub', 'goInno'], ['inno', 'homeI'], ['lshc', 'homeL'], ['fdesk', 'homeF']]) {
     setView(document, mode);
     assert.equal(document.elements.focused, focus);
     assert.equal(document.elements.hub.inert, mode !== 'hub');
     assert.equal(document.elements.lshc.inert, mode !== 'lshc');
+    assert.equal(document.elements.fdesk.inert, mode !== 'fdesk');
     for (const id of ['head', 'hs', 'lower', 'bar']) {
       assert.equal(document.elements[id].inert, mode !== 'inno');
     }
@@ -183,4 +184,14 @@ test('a stale playback rejection cannot interrupt a newer background', async () 
   await Promise.resolve();
   assert.equal(document.elements.mediaStatus.textContent, '');
   assert.equal(document.elements.homeVideo2.playing, true);
+});
+test('Front Desk content: every line has a recorded clip and every hotspot a short label', () => {
+  const content = {}; const voice = {};
+  runInNewContext(readFileSync(resolve(__dirname, '../js/frontdesk-content.js'), 'utf8'), content);
+  runInNewContext(readFileSync(resolve(__dirname, '../js/frontdesk-voice.js'), 'utf8'), voice);
+  const C = content.FDCONTENT, V = voice.FDVOICE;
+  assert.equal(C.chapters.length, 7);
+  const clips = C.greet.map(g => g.clip).concat(['idle']);
+  C.chapters.forEach(ch => { clips.push(ch.key + '-0'); ch.notes.forEach((n, i) => { clips.push(ch.key + '-' + (i + 1)); assert.ok(n[0].split(' ').length <= 3, n[0]); }); if (ch.actLine) clips.push(ch.key + '-act'); });
+  for (const c of clips) { assert.ok(V[c] && V[c].length, 'missing clip ' + c); for (const t of V[c]) assert.ok(require('node:fs').existsSync(resolve(__dirname, '../audio/frontdesk', t.f)), t.f); }
 });
