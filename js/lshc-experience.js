@@ -34,7 +34,7 @@
   /* ---------- hub (start screen) ---------- */
   var homeMedia = KioskUI.initHomeMedia(document, RM);
   function showHub() {
-    mode = 'hub'; window.__innoPaused = true; leaveL(); hub.style.display = 'flex'; void hub.offsetWidth; hub.classList.remove('off');
+    mode = 'hub'; window.__innoPaused = true; leaveL(); if (window.__fdesk) window.__fdesk.leave(); hub.style.display = 'flex'; void hub.offsetWidth; hub.classList.remove('off');
     homeMedia.setActive(true);
     KioskUI.setView(document, mode);
   }
@@ -42,6 +42,8 @@
   hub.addEventListener('pointerdown', function (e) { e.stopPropagation(); rip(e, hub); sfx.tap(); });
   $('goInno').addEventListener('click', function () { sfx.door(); mode = 'inno'; window.__innoPaused = false; hideHub(); $('start').click(); KioskUI.setView(document, mode); });
   $('goLshc').addEventListener('click', function () { sfx.door(); mode = 'lshc'; hideHub(); enterL(); KioskUI.setView(document, mode); });
+  $('goFd').addEventListener('click', function () { sfx.door(); mode = 'fdesk'; hideHub(); if (window.__fdesk) window.__fdesk.enter(); KioskUI.setView(document, mode); });
+  $('homeF').addEventListener('click', function () { sfx.door(); showHub(); });
   $('homeI').addEventListener('click', function () { sfx.door(); if (window.__orbit) window.__orbit.reset(); showHub(); });
   $('homeL').addEventListener('click', function () { sfx.door(); showHub(); });
   KioskUI.setView(document, mode);
@@ -55,7 +57,7 @@
       tabs[next].click();
     });
   });
-  ['homeI', 'homeL', 'voice', 'lvoice'].forEach(function (id) {
+  ['homeI', 'homeL', 'homeF', 'voice', 'lvoice'].forEach(function (id) {
     $(id).title = $(id).getAttribute('aria-label');
   });
 

@@ -11,10 +11,11 @@
   }
 
   function setView(document, mode) {
-    var focus = { hub: 'goInno', inno: 'homeI', lshc: 'homeL' }[mode];
+    var focus = { hub: 'goInno', inno: 'homeI', lshc: 'homeL', fdesk: 'homeF' }[mode];
     if (!focus) throw new Error('Unknown kiosk view');
     document.getElementById('hub').inert = mode !== 'hub';
     document.getElementById('lshc').inert = mode !== 'lshc';
+    var fd = document.getElementById('fdesk'); if (fd) fd.inert = mode !== 'fdesk';
     ['head', 'hs', 'lower', 'bar'].forEach(function (id) {
       document.getElementById(id).inert = mode !== 'inno';
     });
