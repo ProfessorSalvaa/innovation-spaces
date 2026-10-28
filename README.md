@@ -1,4 +1,4 @@
-# Innovation Orbit + LSHC Experience Arena (Hyderabad)
+# Innovation Orbit + LSHC Experience Arena + Front Desk of the Future (Hyderabad)
 
 Kiosk experience for a 1080 x 1920 portrait display (Proto M2). Open `index.html` in Chrome or Edge.
 Double-clicking works. For best results serve it, e.g. in VS Code with the Live Server extension.
@@ -15,6 +15,15 @@ Double-clicking works. For best results serve it, e.g. in VS Code with the Live 
 - Captions are immediately readable; narration still has its own progress indicator and audio toggle. Home returns to the experience selector.
 - Hidden screens are inert. Topic navigation supports Left/Right, Home, and End keys; controls stay fixed rather than following pointer parallax. Topic buttons briefly disable during scene transitions.
 - Reduced-motion preferences disable CSS animations and transitions. The existing 3D reduced-motion behavior is retained.
+
+## Front Desk of the Future (Ava)
+The third door on the home screen. Ava, a hologram host, forms from a point of light and tells the story in seven touchable chapters: Meet Ava, Rush hour, Vision (five ideas), Skills (six capabilities), Stack (eight technology layers), Guest day (Ms. Rivera in a digital twin of the hotel) and Your turn (the honest part, then the doorway to the robot).
+- Voice-led, almost no text on screen: chapter names and one- or two-word hotspot labels. Ava's full lines appear only when **CC** is on, or automatically if her voice is muted or audio fails.
+- Every chapter has one action button (Say hello, Anticipate, Light them up, Check me in, Build the stack, Play her day, Meet the robot). Touch Ava and she reacts; drag to look around, swipe to change chapter. Guided tour and 30-second idle attract mode work as in the LSHC Arena.
+- Voice: ElevenLabs, voice "Sarah", Eleven v4. Two takes of most lines live in `audio/frontdesk/` (`<clip>.mp3`, `<clip>.b.mp3`); a random take plays each visit. `js/frontdesk-voice.js` holds each take's duration and a 30 fps loudness envelope that drives Ava's glow, gestures and the waveform.
+- Text and labels: `js/frontdesk-content.js` (editing changes captions only; re-record the clip to change the voice). Full script: `FrontDesk-voiceover-script.md`.
+- Code: `js/frontdesk-experience.js`, `css/frontdesk.css`, icons in `js/frontdesk-icons.js` (Lucide, ISC).
+- Concept demonstration: hotel data, rooms and guests are simulated.
 
 ## Display style: Normal or Proto (Proto M2)
 The home and start screens have a **Normal | Proto** switch (`js/mode.js`, remembered in the browser). Normal is the original dark design. Proto adds `body.proto`, which `css/hologram.css` and `js/proto-theme.js` use to put everything on white: off-white cards with dark text and layered depth shadows, and the 3D scenes re-rendered on white (normal blending, darker colours, soft floor shadow, no bloom). Proto is a transparent display where dark reads as see-through and light reads as solid. Headlines use one Stix Two Text italic word (class `stix`). Normal mode is untouched by these files. Shadow and tap-target values are estimates (`--hx-float`, `--hx-child`, `--hx-inset`; controls are at least 88 px); check them against the Proto guide on the device.
@@ -58,6 +67,7 @@ Media checks: switch both backgrounds, pause/resume, open the start screen, veri
 - Human anatomy: BodyParts3D, (c) The Database Center for Life Science, licensed CC BY 4.0
   (https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html). Attribution is retained here rather than in the kiosk footer. Geometry was simplified and quantised; the selector preview is a rendered image of that geometry.
   Prepared via the MIT-licensed `ashemag/human-atlas` packaging.
+- Front Desk voice: ElevenLabs (voice "Sarah", Eleven v4).
 - LSHC voice: Kokoro-82M neural text-to-speech (Apache 2.0), voice `af_heart`.
 - World land outline: Natural Earth via `world-atlas` (public domain).
 - three.js r128 (MIT).

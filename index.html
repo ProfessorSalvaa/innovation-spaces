@@ -1,11 +1,12 @@
 <!doctype html><html lang="en"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="stylesheet" href="css/base.css">
 <title>Innovation Experience Centre | Hyderabad</title>
-<meta name="description" content="Explore technology and Life Sciences &amp; Healthcare at the Innovation Experience Centre and LSHC Experience Arena, Hyderabad.">
+<meta name="description" content="Explore technology, Life Sciences &amp; Healthcare, and the Front Desk of the Future at the Innovation Experience Centre, Hyderabad.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=STIX+Two+Text:ital,wght@1,600&display=swap">
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/hologram.css">
+<link rel="stylesheet" href="css/frontdesk.css">
 </head><body>
 
 <div id="stage">
@@ -84,6 +85,13 @@
         <p>Connected care. Living systems.<br>A healthier world.</p>
         <span class="go">Enter<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       </button>
+      <button class="door door-fd" id="goFd" type="button" aria-label="Explore Front Desk of the Future">
+        <img class="preview" src="assets/frontdesk-preview.png" alt="" width="540" height="960">
+        <span class="k">03 / Hospitality &amp; AI</span>
+        <h2>Front Desk of<br>the <i class="stix">Future</i><b>.</b></h2>
+        <p>Meet Ava, your hologram host.</p>
+        <span class="go">Enter<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </button>
     </div>
     <div class="hubfoot"><span>Innovation Space</span><span>Hyderabad</span></div>
   </div>
@@ -142,6 +150,27 @@
     <div id="ltoast" role="status" aria-live="polite"></div>
     <div id="lload"><i></i><span>Preparing the experience</span></div>
   </section>
+
+  <section id="fdesk" aria-label="Front Desk of the Future">
+    <div id="fgl"></div>
+    <header class="fhead">
+      <div class="toprow">
+        <div class="eyebrow"><span id="fnum">01<i> / 07</i></span><span>Front Desk of the Future</span></div>
+        <div class="rside"><button id="homeF" class="homebtn" type="button" aria-label="Back to start"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/></svg></button><button id="fcc" class="fcc" type="button" aria-pressed="false" aria-label="Captions">CC</button><button id="ftour" type="button" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg><span>Guided tour</span></button></div>
+      </div>
+      <h1 id="ftitle"></h1>
+    </header>
+    <div id="fhs"></div>
+    <div id="flower">
+      <p id="fcap" aria-live="polite"></p>
+      <button id="fact" type="button"><svg viewBox="0 0 24 24"><path d="M13.5 2 5 13.5h6L10 22l9-12h-6.500z"/></svg><span id="factl"></span></button>
+      <div id="fvoice"><div id="favatar"></div><span id="flabel">Ava</span><div id="fwave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><button id="fmute" type="button" aria-pressed="true" aria-label="Ava's voice on or off"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 19h8l10-8v26l-10-8H6z"/><path class="w" d="M32 17c3 4 3 10 0 14M38 11c6 7 6 19 0 26"/><path class="x" d="M33 18l10 12M43 18 33 30"/></svg></button></div>
+    </div>
+    <nav id="fdock" role="tablist" aria-label="Chapters"><div id="fpill"></div></nav>
+    <div class="foot"><span id="fprog">Explored <b>0</b> / 33</span><span>Front Desk of the Future</span><span>Hyderabad</span></div>
+    <div id="fflash" aria-hidden="true"></div>
+    <div id="fload"><i></i><span>Ava is getting ready</span></div>
+  </section>
 </div>
 
 <script src="js/vendor/three.min.js"></script>
@@ -159,5 +188,9 @@
 <script src="js/lshc-content.js"></script>
 <script src="js/lshc-data.js"></script>
 <script src="js/lshc-audio-extra.js"></script>
+<script src="js/frontdesk-content.js"></script>
+<script src="js/frontdesk-voice.js"></script>
+<script src="js/frontdesk-icons.js"></script>
+<script src="js/frontdesk-experience.js"></script>
 <script src="js/lshc-experience.js"></script>
 </body></html>
